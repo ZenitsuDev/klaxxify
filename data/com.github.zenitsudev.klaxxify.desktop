@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Rank
+GenericName=Tier List maker
+Comment=Make tier lists
+Exec=com.github.zenitsudev.rank
+Icon=com.github.zenitsudev.rank
+Terminal=false
+Categories=GTK;Office;Accessories;
+StartupNotify=true
+Keywords=Tier;Rank;List;Graph

@@ -1,0 +1,23 @@
+.tier_no1 {
+    background: @STRAWBERRY_500;
+}
+
+.tier_no2 {
+    background: @ORANGE_500;
+}
+
+.tier_no3 {
+    background: @BANANA_500;
+}
+
+.tier_no4 {
+    background: @MINT_500;
+}
+
+.tier_no5 {
+    background: @BLUEBERRY_500;
+}
+
+.highlight_child {
+    border-left: solid #fafafa 5px;
+}
