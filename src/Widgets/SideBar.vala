@@ -82,8 +82,8 @@ public class Klaxxify.SideBar : Gtk.Box {
 
         photo_return_point.on_drop.connect ((val, x, y) => {
             if (val.type () == typeof (Gtk.Image)) {
-                var paintable = ((Gtk.Image) val).paintable;
-                var returned_img = new Gtk.Image.from_paintable (paintable) {
+                var paintable = ((Gtk.Image) val).file;
+                var returned_img = new Gtk.Image.from_file (paintable) {
                     width_request = 100,
                     height_request = 100
                 };
@@ -134,15 +134,15 @@ public class Klaxxify.SideBar : Gtk.Box {
     }
 
     public void add_item (string filename) {
-        var file = File.new_for_path (filename);
-        Gdk.Texture texture = null;
-        try {
-            texture = Gdk.Texture.from_file (file);
-        } catch (Error e) {
-            print ("%s\n", e.message);
-        }
+        // var file = File.new_for_path (filename);
+        // Gdk.Texture texture = null;
+        // try {
+        //     texture = Gdk.Texture.from_file (file);
+        // } catch (Error e) {
+        //     print ("%s\n", e.message);
+        // }
 
-        var image = new Gtk.Image.from_paintable (texture) {
+        var image = new Gtk.Image.from_file (filename) {
             width_request = 100,
             height_request = 100
         };

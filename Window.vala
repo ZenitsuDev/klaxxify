@@ -1,5 +1,7 @@
 public class Klaxxify.Window : Gtk.ApplicationWindow {
-
+    public signal void title_changed (string title);
+    public Granite.HeaderLabel title_label { get; set; }
+    private bool is_in_klaxx = false;
     public Window (Klaxxify.Application app) {
         Object (application: app);
     }
@@ -17,34 +19,39 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             visible = false
         };
 
-        var title = new Granite.HeaderLabel ("") {
+        title_label = new Granite.HeaderLabel ("") {
             halign = Gtk.Align.CENTER,
             hexpand = true
         };
 
-        var entry = new Gtk.Entry () {
+        var title_entry = new Gtk.Entry () {
+            width_request = 250,
             halign = Gtk.Align.CENTER
         };
 
         var title_stack = new Gtk.Stack () {
             transition_type = Gtk.StackTransitionType.CROSSFADE
         };
-        title_stack.add_named (title, "title");
-        title_stack.add_named (entry, "entry");
+        title_stack.add_named (title_label, "title");
+        title_stack.add_named (title_entry, "entry");
 
         var edit_title_controller = new Gtk.GestureClick ();
         title_stack.add_controller (edit_title_controller);
 
         edit_title_controller.pressed.connect (() => {
-            title_stack.visible_child_name = "entry";
+            if (is_in_klaxx) {
+                title_stack.visible_child_name = "entry";
+            }
         });
 
-        entry.activate.connect (() => {
+        title_entry.activate.connect (() => {
             title_stack.visible_child_name = "title";
+            title_changed (title_entry.get_text ());
         });
 
-        entry.buffer.inserted_text.connect (() => {
-            title.label = entry.get_text ();
+        title_entry.buffer.inserted_text.connect (() => {
+            title_label.label = title_entry.get_text ();
+            title_changed (title_entry.get_text ());
         });
 
         var tier_header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
@@ -57,7 +64,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
 
         var placeholder = new Granite.Placeholder ("Create Klaxxify List") {
             description = "Create a new blank klaxxify list.",
-            icon = new ThemedIcon ("insert-image")
+            icon = new ThemedIcon ("com.github.zenitsudev.klaxxify")
         };
 
         var open_last = placeholder.append_button (
@@ -149,12 +156,13 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
                     case Gtk.ResponseType.ACCEPT:
                         file = dialog.get_file ();
                         if (file != null) {
-                            var tier_page = new Klaxxify.TierPage.from_file (file);
+                            var tier_page = new Klaxxify.TierPage.from_file (this, file);
                             stack.add_named (tier_page, "tier");
                             stack.visible_child_name = "tier";
                             flap.reveal_flap = true;
-                            title.label = tier_page.tier_name;
-                            entry.buffer.set_text ((uint8[]) title.label);
+                            title_label.label = tier_page.tier_name;
+                            title_entry.buffer.set_text ((uint8[]) title_label.label);
+                            is_in_klaxx = true;
                             return_to_main.visible = true;
                         } else {
                             critical ("%s cannot be processed.", file.get_basename ());
@@ -170,12 +178,13 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         });
 
         create_new.clicked.connect (() => {
-            var tier_page = new Klaxxify.TierPage ("New Tier List");
+            var tier_page = new Klaxxify.TierPage (this, "New Tier List");
             stack.add_named (tier_page, "tier");
             stack.visible_child_name = "tier";
             flap.reveal_flap = true;
-            title.label = tier_page.tier_name;
-            entry.buffer.set_text ((uint8[]) title.label);
+            title_label.label = tier_page.tier_name;
+            title_entry.buffer.set_text ((uint8[]) title_label.label);
+            is_in_klaxx = true;
             return_to_main.visible = true;
         });
 
@@ -186,8 +195,9 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
                 draggables_sidebar.clear_draggables ();
             }
             flap.reveal_flap = false;
-            title.label = "";
+            title_label.label = "";
             title_stack.visible_child_name = "title";
+            is_in_klaxx = false;
             return_to_main.visible = false;
         });
 

@@ -1,15 +1,22 @@
 public class Klaxxify.TierPage : Gtk.Widget {
     public File file { get; set construct; }
     public string tier_name { get; set construct; }
+    public Klaxxify.Window window { get; construct; }
     public Gtk.Box main_box { get; set; }
     private bool is_new { get; set; }
 
-    public TierPage (string name) {
-        Object (tier_name: name);
+    public TierPage (Klaxxify.Window window, string name) {
+        Object (
+            window: window,
+            tier_name: name
+        );
     }
 
-    public TierPage.from_file (File file) {
-        Object (file: file);
+    public TierPage.from_file (Klaxxify.Window window, File file) {
+        Object (
+            window: window,
+            file: file
+        );
     }
 
     static construct {
@@ -46,6 +53,10 @@ public class Klaxxify.TierPage : Gtk.Widget {
             is_new = true;
         }
 
+        window.title_changed.connect ((new_title) => {
+            content[0] = new_title;
+        });
+
         main_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0) {
             hexpand = true,
             valign = Gtk.Align.CENTER,
@@ -67,30 +78,3 @@ public class Klaxxify.TierPage : Gtk.Widget {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// var f = File.new_for_uri ("https://i.ytimg.com/vi/4oBpaBEMBIM/maxresdefault.jpg");
-//         var texture = Gdk.Texture.from_file (f);
-//         var image = new Gtk.Image.from_paintable (texture) {
-//             hexpand = true,
-//             vexpand = true
-//         };
-//         image.set_parent (this);
