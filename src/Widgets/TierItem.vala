@@ -4,8 +4,11 @@ public class Klaxxify.TierItem : Gtk.Widget {
     public string tier { get; set construct; }
     public int index { get; construct; }
     private Gtk.FlowBoxChild child;
-    public TierItem (string tier, int index) {
+    public Klaxxify.TierPage page { get; construct; }
+
+    public TierItem (Klaxxify.TierPage page, string tier, int index) {
         Object (
+            page: page,
             tier: tier,
             index: index
         );
@@ -102,15 +105,12 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 fb.append (image);
                 tier_items = insert_item (tier_items, file, tier_items.length);
             } else {
-                bool backward;
                 var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
                 fb.insert (image, fbchild.get_index ());
                 tier_items = insert_item (tier_items, file, fbchild.get_index ());
             }
 
-            // foreach (var item in tier_items) {
-            //     print ("%s\n", item);
-            // }
+            must_save (tier_items);
 
             return true;
         });
@@ -155,6 +155,8 @@ public class Klaxxify.TierItem : Gtk.Widget {
 
                 flowbox.remove (child);
                 child = null;
+
+                must_save (tier_items);
             }
         });
 
@@ -174,8 +176,6 @@ public class Klaxxify.TierItem : Gtk.Widget {
         var klaxx_array = new GenericArray<string> ();
         klaxx_array.data = tier_items;
 
-        print ("ITO YON: %s\n", filename);
-
         if (filename in klaxx_array.data) {
             uint source_index = 0;
             while (klaxx_array.get (source_index) != filename) {
@@ -193,5 +193,29 @@ public class Klaxxify.TierItem : Gtk.Widget {
         }
 
         return klaxx_array.data;
+    }
+
+    public signal void must_save (string[] array) {
+        string second_degree_main = "";
+        for (int second_degree = 0; second_degree < array.length; second_degree++) {
+            second_degree_main = string.join (",", second_degree_main, array[second_degree]);
+        }
+
+        second_degree_main = (string) second_degree_main.data[1:];
+        print ("Before: %s\n", page.content[index]);
+        page.content[index] = second_degree_main;
+        print ("After: %s\n", page.content[index]);
+
+        string first_degree_main = "";
+        for (int first_degree = 0; first_degree < page.content.length; first_degree++) {
+            first_degree_main = string.join ("\n", first_degree_main, page.content[first_degree]);
+        }
+
+        first_degree_main = (string) first_degree_main.data[1:];
+        try {
+            page.file.replace_contents (first_degree_main.data, null, true, GLib.FileCreateFlags.NONE, null, null);
+        } catch ( GLib.Error e ) {
+            GLib.error (e.message);
+        }
     }
 }

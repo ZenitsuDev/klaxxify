@@ -4,6 +4,7 @@ public class Klaxxify.TierPage : Gtk.Widget {
     public Klaxxify.Window window { get; construct; }
     public Gtk.Box main_box { get; set; }
     private bool is_new { get; set; }
+    public string[] content { get; set; }
 
     public TierPage (Klaxxify.Window window, string name) {
         Object (
@@ -30,7 +31,6 @@ public class Klaxxify.TierPage : Gtk.Widget {
     }
 
     construct {
-        string[] content;
         if (file != null) {
             try {
 		        uint8[] contents;
@@ -45,11 +45,7 @@ public class Klaxxify.TierPage : Gtk.Widget {
 		        print ("Error: %s\n", e.message);
 	        }
         } else {
-            content += tier_name;
-            content += "S";
-            content += "A";
-            content += "B";
-            content += "C";
+            content = (string[]) string.join ("\n", tier_name, "S", "A", "B", "C").split ("\n");
             is_new = true;
         }
 
@@ -72,7 +68,33 @@ public class Klaxxify.TierPage : Gtk.Widget {
     public void load_tier (string[] content) {
         var tier_num = 1;
         while (tier_num < (content.length - (int) !is_new) && content[tier_num] != "&&&&&UnusedFiles&&&&&") {
-            var tier_item = new Klaxxify.TierItem (content[tier_num], tier_num);
+            var tier_item = new Klaxxify.TierItem (this, content[tier_num], tier_num);
+            // tier_item.must_save.connect ((array) => {
+                // string second_degree_main = "";
+                // for (int second_degree = 0; second_degree < array.length; second_degree++) {
+                //     second_degree_main = string.join (",", second_degree_main, array[second_degree]);
+                // }
+
+                // second_degree_main = (string) second_degree_main.data[1:];
+                // print ("Before: %s\n", content[tier_num]);
+                // content[tier_num] = second_degree_main;
+                // print ("After: %s\n", content[tier_num]);
+
+                // string first_degree_main = "";
+                // for (int first_degree = 0; first_degree < content.length; first_degree++) {
+                //     first_degree_main = string.join ("\n", first_degree_main, content[first_degree]);
+                // }
+
+                // first_degree_main = (string) first_degree_main.data[1:];
+                // print ("%s", first_degree_main);
+
+             //    try {
+		           //  file.replace_contents (first_degree_main.data, null, true, GLib.FileCreateFlags.NONE, null, null);
+	            // } catch ( GLib.Error e ) {
+		           //  GLib.error (e.message);
+	            // }
+            // });
+
             main_box.append (tier_item);
             tier_num++;
         }
