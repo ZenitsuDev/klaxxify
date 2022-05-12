@@ -55,6 +55,11 @@ public class Klaxxify.TierItem : Gtk.Widget {
         var drop_target = new Gtk.DropTarget (typeof (Gtk.Image), Gdk.DragAction.MOVE);
         flowbox.add_controller (drop_target);
 
+        var drag_source = new Gtk.DragSource () {
+            actions = Gdk.DragAction.MOVE
+        };
+        flowbox.add_controller (drag_source);
+
         drop_target.motion.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
                 if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
@@ -110,21 +115,20 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 tier_items = insert_item (tier_items, file, fbchild.get_index ());
             }
 
+            var drag = drop_target.get_current_drop ().get_drag ();
+            if (drag.get_data<string> ("class") == tier_items[0]) {
+                drag.set_data<string> ("drop_same", "true");
+            }
+
             must_save (tier_items);
 
             return true;
         });
 
-        var drag_source = new Gtk.DragSource () {
-            actions = Gdk.DragAction.MOVE
-        };
-        flowbox.add_controller (drag_source);
-
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = flowbox.get_child_at_pos ((int) x, (int) y);
                 flowbox.set_data<Gtk.Image> ("dragged", (Gtk.Image) child.child);
-                flowbox.set_data<string> ("from_tier", tier_items[0]);
                 return new Gdk.ContentProvider.for_value ((Gtk.Image) child.child);
             }
         });
@@ -136,11 +140,13 @@ public class Klaxxify.TierItem : Gtk.Widget {
             dragged.height_request = 100;
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
+            drag.set_data<string> ("class", tier_items[0]);
+            drag.set_data<string> ("drop_same", "false");
         });
 
-        drag_source.drag_end.connect ((drag, del) => {
+        drag_source.drag_end.connect ((source, drag, del) => {
             if (del) {
-                if (((Gtk.Image) child.child).file in tier_items) {
+                if (((Gtk.Image) child.child).file in tier_items && drag.get_data<string> ("drop_same") == "false") {
                     var arr = new GenericArray<string> ();
                     arr.data = tier_items;
 
@@ -182,7 +188,17 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 source_index++;
             }
 
-            bool is_backward = (source_index < index);
+            // bool is_backward = (source_index < index);
+            bool is_backward;
+            if (source_index < index) {
+                is_backward = true;
+            } else if (source_index == index) {
+                is_backward = false;
+            } else {
+                is_backward = false;
+            }
+
+            print ("Source: %s Target: %s\n", source_index.to_string (), index.to_string ());
 
             klaxx_array.remove (klaxx_array.get (source_index));
             klaxx_array.insert (index - (int) is_backward, filename);
@@ -202,9 +218,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
         }
 
         second_degree_main = (string) second_degree_main.data[1:];
-        print ("Before: %s\n", page.content[index]);
         page.content[index] = second_degree_main;
-        print ("After: %s\n", page.content[index]);
 
         string first_degree_main = "";
         for (int first_degree = 0; first_degree < page.content.length; first_degree++) {
