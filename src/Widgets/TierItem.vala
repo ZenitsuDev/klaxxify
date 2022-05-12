@@ -108,9 +108,9 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 tier_items = insert_item (tier_items, file, fbchild.get_index ());
             }
 
-            foreach (var item in tier_items) {
-                print ("%s\n", item);
-            }
+            // foreach (var item in tier_items) {
+            //     print ("%s\n", item);
+            // }
 
             return true;
         });
@@ -140,6 +140,19 @@ public class Klaxxify.TierItem : Gtk.Widget {
 
         drag_source.drag_end.connect ((drag, del) => {
             if (del) {
+                if (((Gtk.Image) child.child).file in tier_items) {
+                    var arr = new GenericArray<string> ();
+                    arr.data = tier_items;
+
+                    uint source_index = 0;
+                    while (arr.get (source_index) != ((Gtk.Image) child.child).file) {
+                        source_index++;
+                    }
+
+                    arr.remove (arr.get (source_index));
+                    tier_items = arr.data;
+                }
+
                 flowbox.remove (child);
                 child = null;
             }
