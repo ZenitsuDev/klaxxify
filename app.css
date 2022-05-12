@@ -19,5 +19,7 @@
 }
 
 .highlight_child {
-    border-left: solid #000 5px;
+    /*border-left: solid #000 5px;*/
+    background: @SLATE_100;
+    opacity: 0.6;
 }

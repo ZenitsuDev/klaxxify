@@ -156,31 +156,40 @@ public class Klaxxify.TierItem : Gtk.Widget {
     }
 
     public string[] insert_item (string[] tier_items, string filename, int index) {
-        var klaxx_array = tier_items;
+        var klaxx_array = new GenericArray<string> ();
+        klaxx_array.data = tier_items;
 
         print ("ITO YON: %s\n", filename);
 
-        if (!(filename in tier_items)) {
-            klaxx_array.resize (tier_items.length + 1);
-
-            for (var i = klaxx_array.length - 1; i >= index; i--) {
-                klaxx_array[i] = klaxx_array[i - 1];
+        if (filename in klaxx_array.data) {
+            uint source_index = 0;
+            while (klaxx_array.get (source_index) != filename) {
+                source_index++;
             }
 
-            klaxx_array[index - 1] = filename;
+            klaxx_array.remove (klaxx_array.get (source_index));
+            klaxx_array.insert (index - 1, filename);
         } else {
-            for (var source_index = 0; source_index < klaxx_array.length; source_index++) {
-                if (klaxx_array[source_index] == filename) {
-                    var array = new GenericArray <string> ();
-                    array.data = klaxx_array;
-                    array.remove_index (source_index);
-                    array.insert (index, filename);
-
-                    klaxx_array = array.data;
-                }
-            }
+            klaxx_array.length = klaxx_array.length + 1;
+            klaxx_array.insert (index - 1, filename);
+            klaxx_array.remove (null);
         }
 
-        return klaxx_array;
+        // if (!(filename in tier_items)) {
+        //     klaxx_array.insert (index, filename);
+        // } else {
+        //     // for (var source_index = 0; source_index < klaxx_array.length; source_index++) {
+        //     //     if (klaxx_array.get (source_index) == filename) {
+        //     //         klaxx_array.remove_index (source_index);
+        //     //         klaxx_array.insert (index - 1, filename);
+        //     //     }
+        //     // }
+        //     uint source_index;
+        //     klaxx_array.find (filename, out source_index);
+        //     print ("%s\n", source_index.to_string ());
+        // }
+
+
+        return klaxx_array.data;
     }
 }
