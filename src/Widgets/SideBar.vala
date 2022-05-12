@@ -111,6 +111,7 @@ public class Klaxxify.SideBar : Gtk.Box {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = (Gtk.Image) flowbox.get_child_at_pos ((int) x, (int) y).child;
                 flowbox.set_data<Gtk.Image> ("dragged", child);
+                flowbox.set_data<string> ("from_tier", "sidebar");
                 return new Gdk.ContentProvider.for_value (child);
             }
         });

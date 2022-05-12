@@ -100,11 +100,12 @@ public class Klaxxify.TierItem : Gtk.Widget {
 
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
                 fb.append (image);
-                tier_items = insert_item (tier_items, file, tier_items.length + 1);
+                tier_items = insert_item (tier_items, file, tier_items.length);
             } else {
+                bool backward;
                 var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
                 fb.insert (image, fbchild.get_index ());
-                tier_items = insert_item (tier_items, file, fbchild.get_index () + 1);
+                tier_items = insert_item (tier_items, file, fbchild.get_index ());
             }
 
             foreach (var item in tier_items) {
@@ -123,6 +124,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = flowbox.get_child_at_pos ((int) x, (int) y);
                 flowbox.set_data<Gtk.Image> ("dragged", (Gtk.Image) child.child);
+                flowbox.set_data<string> ("from_tier", tier_items[0]);
                 return new Gdk.ContentProvider.for_value ((Gtk.Image) child.child);
             }
         });
@@ -167,28 +169,15 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 source_index++;
             }
 
+            bool is_backward = (source_index < index);
+
             klaxx_array.remove (klaxx_array.get (source_index));
-            klaxx_array.insert (index - 1, filename);
+            klaxx_array.insert (index - (int) is_backward, filename);
         } else {
             klaxx_array.length = klaxx_array.length + 1;
-            klaxx_array.insert (index - 1, filename);
+            klaxx_array.insert (index, filename);
             klaxx_array.remove (null);
         }
-
-        // if (!(filename in tier_items)) {
-        //     klaxx_array.insert (index, filename);
-        // } else {
-        //     // for (var source_index = 0; source_index < klaxx_array.length; source_index++) {
-        //     //     if (klaxx_array.get (source_index) == filename) {
-        //     //         klaxx_array.remove_index (source_index);
-        //     //         klaxx_array.insert (index - 1, filename);
-        //     //     }
-        //     // }
-        //     uint source_index;
-        //     klaxx_array.find (filename, out source_index);
-        //     print ("%s\n", source_index.to_string ());
-        // }
-
 
         return klaxx_array.data;
     }
