@@ -46,11 +46,25 @@ public class Klaxxify.TierPage : Gtk.Widget {
 	        }
         } else {
             content = (string[]) string.join ("\n", tier_name, "S", "A", "B", "C").split ("\n");
+            var date_time = new DateTime.now_local ();
+            var documents_folder = Environment.get_variable ("HOME") + "/Documents/";
+            file = File.new_for_path ("%sklaxxifile-%s.tlrank".printf (documents_folder, date_time.format ("%d-%m-%y %T")));
             is_new = true;
         }
 
         window.title_changed.connect ((new_title) => {
             content[0] = new_title;
+            string all_contents = "";
+            for (int this_content = 0; this_content < content.length; this_content++) {
+                all_contents = string.join ("\n", all_contents, content[this_content]);
+            }
+
+            all_contents = (string) all_contents.data[1:];
+            try {
+                file.replace_contents (all_contents.data, null, false, GLib.FileCreateFlags.NONE, null, null);
+            } catch ( GLib.Error e ) {
+                GLib.error (e.message);
+            }
         });
 
         main_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0) {

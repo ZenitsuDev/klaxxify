@@ -227,7 +227,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
 
         first_degree_main = (string) first_degree_main.data[1:];
         try {
-            page.file.replace_contents (first_degree_main.data, null, true, GLib.FileCreateFlags.NONE, null, null);
+            page.file.replace_contents (first_degree_main.data, null, false, GLib.FileCreateFlags.NONE, null, null);
         } catch ( GLib.Error e ) {
             GLib.error (e.message);
         }
