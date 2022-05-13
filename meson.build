@@ -11,8 +11,8 @@ meson.add_install_script('meson/post_install.py')
 executable(
     meson.project_name(),
 
-    'Application.vala',
-    'Window.vala',
+    'src/Application.vala',
+    'src/Window.vala',
     'src/Widgets/TierPage.vala',
     'src/Widgets/TierItem.vala',
     'src/Widgets/SideBar.vala',
