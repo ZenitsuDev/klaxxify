@@ -46,7 +46,6 @@ public class Klaxxify.TierPage : Gtk.Widget {
 	        }
         } else {
             var template = tier_name + "\nS\nA\nB\nC\n&&&&&UnusedFiles&&&&&\n";
-            print ("%s\n", tier_name);
             content = template.split ("\n");
             var date_time = new DateTime.now_local ();
             var documents_folder = Environment.get_variable ("HOME") + "/Documents/";
