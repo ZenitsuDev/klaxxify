@@ -3,11 +3,31 @@ public class Klaxxify.SideBar : Gtk.Box {
     public Gtk.Image child { get; set; }
     private Gtk.Stack hidden_stack;
     private Granite.Placeholder add_placeholder;
+    public string[] unused_files { get; set; }
+    public int sidebar_index { get; set; }
+    public Klaxxify.TierPage page { get; set; }
     public SideBar () {
         Object (
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 0
         );
+    }
+
+    public void load_unused_files (string unused, int index) {
+        this.sidebar_index = index;
+        if (unused == "") {
+            hidden_stack.visible_child_name = "placeholder";
+        } else {
+            unused_files = unused.split (",");
+            foreach (var unused_file in unused_files) {
+                add_item (unused_file);
+            }
+            hidden_stack.visible_child_name = "images";
+        }
+    }
+
+    public void connect_to_page (Klaxxify.TierPage page) {
+        this.page = page;
     }
 
     construct {
@@ -19,8 +39,6 @@ public class Klaxxify.SideBar : Gtk.Box {
         flowbox = new Gtk.FlowBox () {
             homogeneous = true,
             vexpand = true,
-            row_spacing = 10,
-            column_spacing = 10,
             valign = Gtk.Align.START,
             halign = Gtk.Align.FILL
         };
@@ -66,6 +84,8 @@ public class Klaxxify.SideBar : Gtk.Box {
                             hidden_stack.visible_child_name = "images";
                         }
                         add_item (file.get_path ());
+                        unused_files = add_to_unused (file.get_path ());
+                        page.save_to_file (unused_files, sidebar_index);
                     } else {
                         print ("%s is not an image file.\n", file.get_path ());
                     }
@@ -82,21 +102,41 @@ public class Klaxxify.SideBar : Gtk.Box {
 
         photo_return_point.on_drop.connect ((val, x, y) => {
             if (val.type () == typeof (Gtk.Image)) {
-                var paintable = ((Gtk.Image) val).file;
-                var returned_img = new Gtk.Image.from_file (paintable) {
+                var image_file = ((Gtk.Image) val).file;
+                var returned_img = new Gtk.Image.from_file (image_file) {
                     width_request = 100,
-                    height_request = 100
+                    height_request = 100,
+                    margin_start = 10,
+                    margin_end = 10,
+                    margin_top = 10,
+                    margin_bottom = 10,
+                    halign = Gtk.Align.CENTER,
+                    valign = Gtk.Align.CENTER,
                 };
                 returned_img.add_css_class (Granite.STYLE_CLASS_CARD);
 
+                var fbcontainer = new Gtk.FlowBoxChild () {
+                    child = returned_img,
+                    width_request = 100,
+                    height_request = 100,
+                };
+
                 if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
-                    flowbox.append (returned_img);
+                    flowbox.append (fbcontainer);
+                    unused_files = add_to_unused (image_file);
                 } else {
                     var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
-                    flowbox.insert (returned_img, fbchild.get_index ());
+                    flowbox.insert (fbcontainer, fbchild.get_index ());
+                    unused_files = add_to_unused (image_file, fbchild.get_index ());
                 }
+                page.save_to_file (unused_files, sidebar_index);
             } else {
                 photo_drop_point.reject ();
+            }
+
+            var drag = photo_return_point.get_current_drop ().get_drag ();
+            if (drag.get_data<string> ("class") == "sidebar") {
+                drag.set_data<string> ("in_sidebar", "true");
             }
 
             return true;
@@ -122,10 +162,26 @@ public class Klaxxify.SideBar : Gtk.Box {
             dragged.height_request = 100;
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
+            drag.set_data<string> ("class", "sidebar");
+            drag.set_data<string> ("in_sidebar", "false");
         });
 
         drag_source.drag_end.connect ((drag, del) => {
             if (del) {
+                if (child.file in unused_files && drag.get_data<string> ("in_sidebar") == "false") {
+                    var arr = new GenericArray<string> ();
+                    arr.data = unused_files;
+
+                    uint source_index = 0;
+                    while (arr.get (source_index) != child.file) {
+                        source_index++;
+                    }
+
+                    arr.remove (arr.get (source_index));
+                    unused_files = arr.data;
+                }
+                page.save_to_file (unused_files, sidebar_index);
+
                 flowbox.remove (child);
                 child = null;
             }
@@ -134,21 +190,25 @@ public class Klaxxify.SideBar : Gtk.Box {
     }
 
     public void add_item (string filename) {
-        // var file = File.new_for_path (filename);
-        // Gdk.Texture texture = null;
-        // try {
-        //     texture = Gdk.Texture.from_file (file);
-        // } catch (Error e) {
-        //     print ("%s\n", e.message);
-        // }
-
         var image = new Gtk.Image.from_file (filename) {
             width_request = 100,
-            height_request = 100
+            height_request = 100,
+            margin_start = 10,
+            margin_end = 10,
+            margin_top = 10,
+            margin_bottom = 10,
+            halign = Gtk.Align.CENTER,
+            valign = Gtk.Align.CENTER,
         };
         image.add_css_class (Granite.STYLE_CLASS_CARD);
 
-        flowbox.append (image);
+        var fbcontainer = new Gtk.FlowBoxChild () {
+            child = image,
+            width_request = 100,
+            height_request = 100,
+        };
+
+        flowbox.append (fbcontainer);
     }
 
     public void clear_draggables () {
@@ -156,5 +216,30 @@ public class Klaxxify.SideBar : Gtk.Box {
             flowbox.remove (flowbox.get_last_child ());
         }
         hidden_stack.visible_child_name = "placeholder";
+    }
+
+    public string[] add_to_unused (string path, int index = -1) {
+        var unused_array = new GenericArray<string> ();
+        unused_array.data = unused_files;
+
+        if (path in unused_array.data) {
+            uint source_index = 0;
+            while (unused_array.get (source_index) != path) {
+                source_index++;
+            }
+
+            bool is_backward = (source_index < index);
+
+            unused_array.remove (unused_array.get (source_index));
+            if (index - (int) is_backward - 1 <= -1) {
+                unused_array.add (path);
+            } else {
+                unused_array.insert (index - (int) is_backward - 1, path);
+            }
+        } else {
+            unused_array.add (path);
+        }
+
+        return unused_array.data;
     }
 }

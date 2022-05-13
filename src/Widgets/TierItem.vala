@@ -120,7 +120,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 drag.set_data<string> ("drop_same", "true");
             }
 
-            must_save (tier_items);
+            page.save_to_file (tier_items, index);
 
             return true;
         });
@@ -162,7 +162,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 flowbox.remove (child);
                 child = null;
 
-                must_save (tier_items);
+                page.save_to_file (tier_items, index);
             }
         });
 
@@ -188,17 +188,7 @@ public class Klaxxify.TierItem : Gtk.Widget {
                 source_index++;
             }
 
-            // bool is_backward = (source_index < index);
-            bool is_backward;
-            if (source_index < index) {
-                is_backward = true;
-            } else if (source_index == index) {
-                is_backward = false;
-            } else {
-                is_backward = false;
-            }
-
-            print ("Source: %s Target: %s\n", source_index.to_string (), index.to_string ());
+            bool is_backward = (source_index < index);
 
             klaxx_array.remove (klaxx_array.get (source_index));
             klaxx_array.insert (index - (int) is_backward, filename);
@@ -209,27 +199,5 @@ public class Klaxxify.TierItem : Gtk.Widget {
         }
 
         return klaxx_array.data;
-    }
-
-    public signal void must_save (string[] array) {
-        string second_degree_main = "";
-        for (int second_degree = 0; second_degree < array.length; second_degree++) {
-            second_degree_main = string.join (",", second_degree_main, array[second_degree]);
-        }
-
-        second_degree_main = (string) second_degree_main.data[1:];
-        page.content[index] = second_degree_main;
-
-        string first_degree_main = "";
-        for (int first_degree = 0; first_degree < page.content.length; first_degree++) {
-            first_degree_main = string.join ("\n", first_degree_main, page.content[first_degree]);
-        }
-
-        first_degree_main = (string) first_degree_main.data[1:];
-        try {
-            page.file.replace_contents (first_degree_main.data, null, false, GLib.FileCreateFlags.NONE, null, null);
-        } catch ( GLib.Error e ) {
-            GLib.error (e.message);
-        }
     }
 }
