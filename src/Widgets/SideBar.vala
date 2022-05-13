@@ -1,7 +1,7 @@
 public class Klaxxify.SideBar : Gtk.Box {
     public Gtk.FlowBox flowbox { get; set; }
     public Gtk.Image child { get; set; }
-    private Gtk.Stack hidden_stack;
+    public Gtk.Stack hidden_stack;
     private Granite.Placeholder add_placeholder;
     public string[] unused_files { get; set; }
     public int sidebar_index { get; set; }
@@ -11,19 +11,6 @@ public class Klaxxify.SideBar : Gtk.Box {
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 0
         );
-    }
-
-    public void load_unused_files (string unused, int index) {
-        this.sidebar_index = index;
-        if (unused == "") {
-            hidden_stack.visible_child_name = "placeholder";
-        } else {
-            unused_files = unused.split (",");
-            foreach (var unused_file in unused_files) {
-                add_item (unused_file);
-            }
-            hidden_stack.visible_child_name = "images";
-        }
     }
 
     public void connect_to_page (Klaxxify.TierPage page) {
@@ -187,6 +174,15 @@ public class Klaxxify.SideBar : Gtk.Box {
             }
         });
 
+    }
+
+    public void load_unused_files (string unused, int index) {
+        this.sidebar_index = index;
+        unused_files = unused.split (",");
+        foreach (var unused_file in unused_files) {
+            add_item (unused_file);
+        }
+        hidden_stack.visible_child_name = "images";
     }
 
     public void add_item (string filename) {

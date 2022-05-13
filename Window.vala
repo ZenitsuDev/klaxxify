@@ -1,9 +1,12 @@
 public class Klaxxify.Window : Gtk.ApplicationWindow {
-    public signal void title_changed (string title);
     public Granite.HeaderLabel title_label { get; set; }
     public Klaxxify.SideBar draggables_sidebar { get; set; }
     public Klaxxify.TierPage tier_page { get; set; }
+
     private bool is_in_klaxx = false;
+
+    public signal void title_changed (string title);
+
     public Window (Klaxxify.Application app) {
         Object (application: app);
     }
@@ -13,8 +16,6 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             visible = false
         };
         set_titlebar (titlebar);
-
-        var start_window_controls = new Gtk.WindowControls (Gtk.PackType.START);
 
         var return_to_main = new Gtk.Button.from_icon_name ("go-previous-symbolic") {
             halign = Gtk.Align.START,
@@ -57,13 +58,14 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             title_changed (title_entry.get_text ());
         });
 
-        var tier_header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+        var tier_header = new Gtk.HeaderBar () {
+            title_widget = title_stack,
+            decoration_layout = "close:"
+        };
         tier_header.add_css_class ("titlebar");
         tier_header.add_css_class (Granite.STYLE_CLASS_FLAT);
         tier_header.add_css_class (Granite.STYLE_CLASS_DEFAULT_DECORATION);
-        tier_header.append (start_window_controls);
-        tier_header.append (return_to_main);
-        tier_header.append (title_stack);
+        tier_header.pack_start (return_to_main);
 
         var placeholder = new Granite.Placeholder ("Create Klaxxify List") {
             description = "Create a new blank klaxxify list.",
