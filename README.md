@@ -1,5 +1,5 @@
 # Klaxxify
-## alpha
+## (Alpha)
 
 ![Screenshot](data/screenshot.png?raw=true)
 
