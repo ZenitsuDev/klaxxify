@@ -2,6 +2,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
     public Granite.HeaderLabel title_label { get; set; }
     public Klaxxify.SideBar draggables_sidebar { get; set; }
     public Klaxxify.TierPage tier_page { get; set; }
+    public bool title_change_allowed { get; set; }
 
     private bool is_in_klaxx = false;
 
@@ -50,12 +51,14 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         title_entry.activate.connect (() => {
             title_stack.visible_child_name = "title";
             title_label.label = title_entry.get_text ();
-            title_changed (title_entry.get_text ());
+            string[] title = {title_entry.get_text ()};
+            tier_page.save_to_file (title, 0);
         });
 
         title_entry.buffer.inserted_text.connect (() => {
             title_label.label = title_entry.get_text ();
-            title_changed (title_entry.get_text ());
+            string[] title = {title_entry.get_text ()};
+            tier_page.save_to_file (title, 0);
         });
 
         var tier_header = new Gtk.HeaderBar () {
@@ -169,6 +172,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
                             title_entry.buffer.set_text ((uint8[]) title_label.label);
                             is_in_klaxx = true;
                             draggables_sidebar.connect_to_page (tier_page);
+                            title_change_allowed = true;
                             return_to_main.visible = true;
                         } else {
                             critical ("%s cannot be processed.", file.get_basename ());
@@ -192,6 +196,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             title_entry.buffer.set_text ((uint8[]) title_label.label);
             is_in_klaxx = true;
             draggables_sidebar.connect_to_page (tier_page);
+            title_change_allowed = true;
             return_to_main.visible = true;
         });
 
@@ -205,6 +210,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             title_label.label = "";
             title_stack.visible_child_name = "title";
             is_in_klaxx = false;
+            title_change_allowed = false;
             return_to_main.visible = false;
         });
 

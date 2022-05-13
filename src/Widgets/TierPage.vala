@@ -54,11 +54,6 @@ public class Klaxxify.TierPage : Gtk.Widget {
             is_new = true;
         }
 
-        window.title_changed.connect ((new_title) => {
-            string[] title = {new_title};
-            save_to_file (title, 0);
-        });
-
         main_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0) {
             hexpand = true,
             valign = Gtk.Align.CENTER,
