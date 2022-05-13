@@ -1,19 +1,19 @@
-public class Klaxxify.TierPage : Gtk.Widget {
+public class Klaxxify.KlaxxPage : Gtk.Widget {
     public File file { get; set construct; }
-    public string tier_name { get; set construct; }
+    public string klaxx_name { get; set construct; }
     public Klaxxify.Window window { get; construct; }
     public Gtk.Box main_box { get; set; }
     private bool is_new { get; set; }
     public string[] content { get; set; }
 
-    public TierPage (Klaxxify.Window window, string name) {
+    public KlaxxPage (Klaxxify.Window window, string name) {
         Object (
             window: window,
-            tier_name: name
+            klaxx_name: name
         );
     }
 
-    public TierPage.from_file (Klaxxify.Window window, File file) {
+    public KlaxxPage.from_file (Klaxxify.Window window, File file) {
         Object (
             window: window,
             file: file
@@ -24,7 +24,7 @@ public class Klaxxify.TierPage : Gtk.Widget {
         set_layout_manager_type (typeof (Gtk.BinLayout));
     }
 
-    ~TierPage () {
+    ~KlaxxPage () {
         while (this.get_last_child () != null) {
             this.get_last_child ().unparent ();
         }
@@ -39,13 +39,13 @@ public class Klaxxify.TierPage : Gtk.Widget {
                 file.load_contents (null, out contents, out etag_out);
 
                 content = ((string) contents).split ("\n");
-                tier_name = content[0];
+                klaxx_name = content[0];
                 is_new = false;
 	        } catch (Error e) {
 		        print ("Error: %s\n", e.message);
 	        }
         } else {
-            var template = tier_name + "\nS\nA\nB\nC\n&&&&&UnusedFiles&&&&&\n";
+            var template = klaxx_name + "\nS\nA\nB\nC\n&&&&&UnusedFiles&&&&&\n";
             content = template.split ("\n");
             var date_time = new DateTime.now_local ();
             var documents_folder = Environment.get_variable ("HOME") + "/Documents/";
@@ -62,19 +62,19 @@ public class Klaxxify.TierPage : Gtk.Widget {
         };
         main_box.set_parent (this);
 
-        var tier_num = 1;
-        while (tier_num < (content.length - (int) !is_new) && content[tier_num] != "&&&&&UnusedFiles&&&&&") {
-            var tier_item = new Klaxxify.TierItem (this, content[tier_num], tier_num);
-            main_box.append (tier_item);
-            tier_num++;
+        var klaxx_num = 1;
+        while (klaxx_num < (content.length - (int) !is_new) && content[klaxx_num] != "&&&&&UnusedFiles&&&&&") {
+            var klaxx_item = new Klaxxify.KlaxxItem (this, content[klaxx_num], klaxx_num);
+            main_box.append (klaxx_item);
+            klaxx_num++;
         }
 
         if (is_new) {
             window.draggables_sidebar.unused_files = {};
-            window.draggables_sidebar.sidebar_index = tier_num + 1;
+            window.draggables_sidebar.sidebar_index = klaxx_num + 1;
             window.draggables_sidebar.hidden_stack.visible_child_name = "placeholder";
         } else {
-            window.draggables_sidebar.load_unused_files (content[tier_num + 1], tier_num + 1);
+            window.draggables_sidebar.load_unused_files (content[klaxx_num + 1], klaxx_num + 1);
         }
     }
 

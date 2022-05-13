@@ -5,7 +5,7 @@ public class Klaxxify.SideBar : Gtk.Box {
     private Granite.Placeholder add_placeholder;
     public string[] unused_files { get; set; }
     public int sidebar_index { get; set; }
-    public Klaxxify.TierPage page { get; set; }
+    public Klaxxify.KlaxxPage page { get; set; }
     public SideBar () {
         Object (
             orientation: Gtk.Orientation.VERTICAL,
@@ -13,7 +13,7 @@ public class Klaxxify.SideBar : Gtk.Box {
         );
     }
 
-    public void connect_to_page (Klaxxify.TierPage page) {
+    public void connect_to_page (Klaxxify.KlaxxPage page) {
         this.page = page;
     }
 

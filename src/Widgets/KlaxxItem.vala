@@ -1,15 +1,15 @@
-public class Klaxxify.TierItem : Gtk.Widget {
+public class Klaxxify.KlaxxItem : Gtk.Widget {
     public Gtk.Box main_child { get; set; }
     public Gtk.FlowBox flowbox { get; set; }
-    public string tier { get; set construct; }
+    public string klaxx { get; set construct; }
     public int index { get; construct; }
     private Gtk.FlowBoxChild child;
-    public Klaxxify.TierPage page { get; construct; }
+    public Klaxxify.KlaxxPage page { get; construct; }
 
-    public TierItem (Klaxxify.TierPage page, string tier, int index) {
+    public KlaxxItem (Klaxxify.KlaxxPage page, string klaxx, int index) {
         Object (
             page: page,
-            tier: tier,
+            klaxx: klaxx,
             index: index
         );
     }
@@ -18,23 +18,23 @@ public class Klaxxify.TierItem : Gtk.Widget {
         set_layout_manager_type (typeof (Gtk.BinLayout));
     }
 
-    ~TierItem () {
+    ~KlaxxItem () {
         while (this.get_last_child () != null) {
             this.get_last_child ().unparent ();
         }
     }
 
     construct {
-        var tier_items = tier.split (",");
+        var klaxx_items = klaxx.split (",");
 
-        var tier_title = new Gtk.FlowBoxChild () { 
-            child = new Gtk.Label (tier_items[0]),
+        var klaxx_title = new Gtk.FlowBoxChild () { 
+            child = new Gtk.Label (klaxx_items[0]),
             can_focus = false, 
             can_target = false,
             width_request = 100,
             vexpand = true
         };
-        tier_title.add_css_class ("tier_no%s".printf (index.to_string ()));
+        klaxx_title.add_css_class ("klaxx_no%s".printf (index.to_string ()));
 
         flowbox = new Gtk.FlowBox () {
             max_children_per_line = 20,
@@ -43,8 +43,8 @@ public class Klaxxify.TierItem : Gtk.Widget {
             homogeneous = true
         };
 
-        for (var item_num = 0; item_num < tier_items.length - 1; item_num++) {
-            var image = new Gtk.Image.from_file (tier_items[item_num + 1]) {
+        for (var item_num = 0; item_num < klaxx_items.length - 1; item_num++) {
+            var image = new Gtk.Image.from_file (klaxx_items[item_num + 1]) {
                 width_request = 100,
                 height_request = 100
             };
@@ -108,19 +108,19 @@ public class Klaxxify.TierItem : Gtk.Widget {
 
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
                 fb.append (image);
-                tier_items = insert_item (tier_items, file, tier_items.length);
+                klaxx_items = insert_item (klaxx_items, file, klaxx_items.length);
             } else {
                 var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
                 fb.insert (image, fbchild.get_index ());
-                tier_items = insert_item (tier_items, file, fbchild.get_index ());
+                klaxx_items = insert_item (klaxx_items, file, fbchild.get_index ());
             }
 
             var drag = drop_target.get_current_drop ().get_drag ();
-            if (drag.get_data<string> ("class") == tier_items[0]) {
+            if (drag.get_data<string> ("class") == klaxx_items[0]) {
                 drag.set_data<string> ("drop_same", "true");
             }
 
-            page.save_to_file (tier_items, index);
+            page.save_to_file (klaxx_items, index);
 
             return true;
         });
@@ -140,15 +140,15 @@ public class Klaxxify.TierItem : Gtk.Widget {
             dragged.height_request = 100;
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
-            drag.set_data<string> ("class", tier_items[0]);
+            drag.set_data<string> ("class", klaxx_items[0]);
             drag.set_data<string> ("drop_same", "false");
         });
 
         drag_source.drag_end.connect ((source, drag, del) => {
             if (del) {
-                if (((Gtk.Image) child.child).file in tier_items && drag.get_data<string> ("drop_same") == "false") {
+                if (((Gtk.Image) child.child).file in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
                     var arr = new GenericArray<string> ();
-                    arr.data = tier_items;
+                    arr.data = klaxx_items;
 
                     uint source_index = 0;
                     while (arr.get (source_index) != ((Gtk.Image) child.child).file) {
@@ -156,13 +156,13 @@ public class Klaxxify.TierItem : Gtk.Widget {
                     }
 
                     arr.remove (arr.get (source_index));
-                    tier_items = arr.data;
+                    klaxx_items = arr.data;
                 }
 
                 flowbox.remove (child);
                 child = null;
 
-                page.save_to_file (tier_items, index);
+                page.save_to_file (klaxx_items, index);
             }
         });
 
@@ -172,15 +172,15 @@ public class Klaxxify.TierItem : Gtk.Widget {
             margin_top = 20
         };
 
-        main_child.append (tier_title);
+        main_child.append (klaxx_title);
         main_child.append (flowbox);
         main_child.add_css_class (Granite.STYLE_CLASS_CARD);
         main_child.set_parent (this);
     }
 
-    public string[] insert_item (string[] tier_items, string filename, int index) {
+    public string[] insert_item (string[] klaxx_items, string filename, int index) {
         var klaxx_array = new GenericArray<string> ();
-        klaxx_array.data = tier_items;
+        klaxx_array.data = klaxx_items;
 
         if (filename in klaxx_array.data) {
             uint source_index = 0;

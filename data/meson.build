@@ -1,3 +1,10 @@
+gnome = import('gnome')
+gresource = gnome.compile_resources(
+    'klaxxify-resources',
+    'klaxxify.gresource.xml',
+    source_dir: join_paths(meson.source_root(), 'data')
+)
+
 install_data(
     meson.project_name() + '.desktop',
     install_dir: join_paths(get_option('datadir'), 'applications')

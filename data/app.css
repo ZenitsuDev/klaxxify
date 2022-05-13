@@ -1,20 +1,20 @@
-.tier_no1 {
+.klaxx_no1 {
     background: @STRAWBERRY_500;
 }
 
-.tier_no2 {
+.klaxx_no2 {
     background: @ORANGE_500;
 }
 
-.tier_no3 {
+.klaxx_no3 {
     background: @BANANA_500;
 }
 
-.tier_no4 {
+.klaxx_no4 {
     background: @MINT_500;
 }
 
-.tier_no5 {
+.klaxx_no5 {
     background: @BLUEBERRY_500;
 }
 

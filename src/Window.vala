@@ -1,7 +1,7 @@
 public class Klaxxify.Window : Gtk.ApplicationWindow {
     public Granite.HeaderLabel title_label { get; set; }
     public Klaxxify.SideBar draggables_sidebar { get; set; }
-    public Klaxxify.TierPage tier_page { get; set; }
+    public Klaxxify.KlaxxPage klaxx_page { get; set; }
     public bool title_change_allowed { get; set; }
 
     private bool is_in_klaxx = false;
@@ -52,23 +52,23 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             title_stack.visible_child_name = "title";
             title_label.label = title_entry.get_text ();
             string[] title = {title_entry.get_text ()};
-            tier_page.save_to_file (title, 0);
+            klaxx_page.save_to_file (title, 0);
         });
 
         title_entry.buffer.inserted_text.connect (() => {
             title_label.label = title_entry.get_text ();
             string[] title = {title_entry.get_text ()};
-            tier_page.save_to_file (title, 0);
+            klaxx_page.save_to_file (title, 0);
         });
 
-        var tier_header = new Gtk.HeaderBar () {
+        var klaxx_header = new Gtk.HeaderBar () {
             title_widget = title_stack,
             decoration_layout = "close:"
         };
-        tier_header.add_css_class ("titlebar");
-        tier_header.add_css_class (Granite.STYLE_CLASS_FLAT);
-        tier_header.add_css_class (Granite.STYLE_CLASS_DEFAULT_DECORATION);
-        tier_header.pack_start (return_to_main);
+        klaxx_header.add_css_class ("titlebar");
+        klaxx_header.add_css_class (Granite.STYLE_CLASS_FLAT);
+        klaxx_header.add_css_class (Granite.STYLE_CLASS_DEFAULT_DECORATION);
+        klaxx_header.pack_start (return_to_main);
 
         var placeholder = new Granite.Placeholder ("Create Klaxxify List") {
             description = "Create a new blank klaxxify list.",
@@ -78,13 +78,13 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         var open_last = placeholder.append_button (
             new ThemedIcon ("document-import"),
             "Open Recent",
-            "Open recently created tier list."
+            "Open recently created klaxx table."
         );
 
         var create_new = placeholder.append_button (
             new ThemedIcon ("document-new"),
-            "Create New Tier List",
-            "Create a new Rank tier list."
+            "Create New Klaxx Table",
+            "Create a new Klaxx table."
         );
 
         var stack = new Gtk.Stack () {
@@ -97,15 +97,15 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             vexpand = true
         };
 
-        var tier_handle = new Gtk.WindowHandle () {
-            child = tier_header
+        var klaxx_handle = new Gtk.WindowHandle () {
+            child = klaxx_header
         };
 
         var main_page = new Gtk.Grid () {
             hexpand = true
         };
         main_page.add_css_class (Granite.STYLE_CLASS_VIEW);
-        main_page.attach (tier_handle, 0, 0);
+        main_page.attach (klaxx_handle, 0, 0);
         main_page.attach (scrolled, 0, 1);
 
         var end_window_controls = new Gtk.WindowControls (Gtk.PackType.END) {
@@ -164,14 +164,14 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
                     case Gtk.ResponseType.ACCEPT:
                         file = dialog.get_file ();
                         if (file != null) {
-                            tier_page = new Klaxxify.TierPage.from_file (this, file);
-                            stack.add_named (tier_page, "tier");
-                            stack.visible_child_name = "tier";
+                            klaxx_page = new Klaxxify.KlaxxPage.from_file (this, file);
+                            stack.add_named (klaxx_page, "klaxx");
+                            stack.visible_child_name = "klaxx";
                             flap.reveal_flap = true;
-                            title_label.label = tier_page.tier_name;
+                            title_label.label = klaxx_page.klaxx_name;
                             title_entry.buffer.set_text ((uint8[]) title_label.label);
                             is_in_klaxx = true;
-                            draggables_sidebar.connect_to_page (tier_page);
+                            draggables_sidebar.connect_to_page (klaxx_page);
                             title_change_allowed = true;
                             return_to_main.visible = true;
                         } else {
@@ -188,21 +188,21 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         });
 
         create_new.clicked.connect (() => {
-            tier_page = new Klaxxify.TierPage (this, "New Tier List");
-            stack.add_named (tier_page, "tier");
-            stack.visible_child_name = "tier";
+            klaxx_page = new Klaxxify.KlaxxPage (this, "New Klaxx List");
+            stack.add_named (klaxx_page, "klaxx");
+            stack.visible_child_name = "klaxx";
             flap.reveal_flap = true;
-            title_label.label = tier_page.tier_name;
+            title_label.label = klaxx_page.klaxx_name;
             title_entry.buffer.set_text ((uint8[]) title_label.label);
             is_in_klaxx = true;
-            draggables_sidebar.connect_to_page (tier_page);
+            draggables_sidebar.connect_to_page (klaxx_page);
             title_change_allowed = true;
             return_to_main.visible = true;
         });
 
         return_to_main.clicked.connect (() => {
             stack.visible_child_name = "main";
-            if (stack.get_last_child () is Klaxxify.TierPage) {
+            if (stack.get_last_child () is Klaxxify.KlaxxPage) {
                 stack.remove (stack.get_last_child ());
                 draggables_sidebar.clear_draggables ();
             }
@@ -228,7 +228,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         });
 
         var css_provider = new Gtk.CssProvider ();
-        css_provider.load_from_path ("/home/owendavid/rank/app.css");
+        css_provider.load_from_resource ("/com/github/zenitsudev/klaxxify/app.css");
         Gtk.StyleContext.add_provider_for_display (Gdk.Display.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
