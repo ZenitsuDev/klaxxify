@@ -115,7 +115,7 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         end_window_controls.add_css_class (Granite.STYLE_CLASS_FLAT);
         end_window_controls.add_css_class (Granite.STYLE_CLASS_DEFAULT_DECORATION);
 
-        draggables_sidebar = new Klaxxify.SideBar () {
+        draggables_sidebar = new Klaxxify.SideBar (this) {
             margin_top = 12,
             margin_end = 12,
             margin_bottom = 24,
@@ -155,7 +155,8 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
             };
             filter.add_suffix ("tlrank");
 
-            var dialog = new Gtk.FileChooserDialog ("Open Recent Rank File", this, Gtk.FileChooserAction.OPEN, "Open", Gtk.ResponseType.ACCEPT, "Cancel", Gtk.ResponseType.CANCEL);
+            var dialog = new Gtk.FileChooserNative ("Open Recent Klaxxify File", this, Gtk.FileChooserAction.OPEN, "Open", "Cancel");
+            // Gtk.ResponseType.ACCEPT, , Gtk.ResponseType.CANCEL
 
             dialog.add_filter (filter);
             dialog.show ();
