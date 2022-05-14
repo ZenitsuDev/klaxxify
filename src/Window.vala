@@ -109,7 +109,8 @@ public class Klaxxify.Window : Gtk.ApplicationWindow {
         main_page.attach (scrolled, 0, 1);
 
         var end_window_controls = new Gtk.WindowControls (Gtk.PackType.END) {
-            halign = Gtk.Align.END
+            decoration_layout = ":maximize",
+	    halign = Gtk.Align.END
         };
         end_window_controls.add_css_class ("titlebar");
         end_window_controls.add_css_class (Granite.STYLE_CLASS_FLAT);
