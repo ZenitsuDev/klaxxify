@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Rank
+Name=Klaxxify
 GenericName=Tier List maker
 Comment=Make tier lists
 Exec=com.github.zenitsudev.klaxxify
