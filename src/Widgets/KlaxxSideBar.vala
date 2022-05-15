@@ -32,6 +32,22 @@ public class Klaxxify.SideBar : Gtk.Box {
             halign = Gtk.Align.FILL
         };
 
+        var add_more_images = new Gtk.Button () {
+            halign = Gtk.Align.END,
+            can_focus = false,
+            child = new Gtk.Image () {
+                gicon = new ThemedIcon ("list-add-symbolic")
+            }
+        };
+        add_more_images.add_css_class (Granite.STYLE_CLASS_FLAT);
+
+        var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) {
+            width_request = 250,
+            halign = Gtk.Align.END
+        };
+        top_box.append (label);
+        top_box.append (add_more_images);
+
         var scrolled = new Gtk.ScrolledWindow () {
             child = flowbox
         };
@@ -41,7 +57,7 @@ public class Klaxxify.SideBar : Gtk.Box {
             halign = Gtk.Align.FILL
         };
 
-        data_box.append (label);
+        data_box.append (top_box);
         data_box.append (scrolled);
 
         add_placeholder = new Granite.Placeholder ("Add Items") {
@@ -63,44 +79,8 @@ public class Klaxxify.SideBar : Gtk.Box {
         hidden_stack.add_named (data_box, "images");
         append (hidden_stack);
 
-        open_images.clicked.connect (() => {
-            ListModel? image_files = null;
-            var filter = new Gtk.FileFilter () {
-                name = "Image files"
-            };
-            filter.add_mime_type ("image/*");
-
-            var dialog = new Gtk.FileChooserNative ("Open Recent Klaxxify File", window, Gtk.FileChooserAction.OPEN, "Open", "Cancel") {
-                select_multiple = true
-            };
-
-            dialog.add_filter (filter);
-            dialog.show ();
-
-            dialog.response.connect ((id) => {
-                switch (id) {
-                    case Gtk.ResponseType.ACCEPT:
-                        image_files = dialog.get_files ();
-                        for (var file_index = 0; file_index < image_files.get_n_items (); file_index++) {
-                            var image_file = (File) image_files.get_item (file_index);
-                            if (image_files.get_item (file_index) != null) {
-                                add_item (image_file.get_path ());
-                                unused_files = add_to_unused (image_file.get_path ());
-                                page.save_to_file (unused_files, sidebar_index);
-                            } else {
-                                critical ("%s cannot be processed.", image_file.get_basename ());
-                            }
-                        }
-                        hidden_stack.visible_child_name = "images";
-                        dialog.hide ();
-                        break;
-                    case Gtk.ResponseType.CANCEL:
-                        dialog.hide ();
-                        break;
-                }
-                dialog.destroy ();
-            });
-        });
+        open_images.clicked.connect (add_to_sidebar);
+        add_more_images.clicked.connect (add_to_sidebar);
 
         var photo_return_point = new Gtk.DropTarget (typeof (Gtk.Image), Gdk.DragAction.MOVE);
         this.add_controller (photo_return_point);
@@ -255,5 +235,44 @@ public class Klaxxify.SideBar : Gtk.Box {
         }
 
         return unused_array.data;
+    }
+
+    private void add_to_sidebar () {
+        ListModel? image_files = null;
+        var filter = new Gtk.FileFilter () {
+            name = "Image files"
+        };
+        filter.add_mime_type ("image/*");
+
+        var dialog = new Gtk.FileChooserNative ("Open Recent Klaxxify File", window, Gtk.FileChooserAction.OPEN, "Open", "Cancel") {
+            select_multiple = true
+        };
+
+        dialog.add_filter (filter);
+        dialog.show ();
+
+        dialog.response.connect ((id) => {
+            switch (id) {
+                case Gtk.ResponseType.ACCEPT:
+                    image_files = dialog.get_files ();
+                    for (var file_index = 0; file_index < image_files.get_n_items (); file_index++) {
+                        var image_file = (File) image_files.get_item (file_index);
+                        if (image_files.get_item (file_index) != null) {
+                            add_item (image_file.get_path ());
+                            unused_files = add_to_unused (image_file.get_path ());
+                            page.save_to_file (unused_files, sidebar_index);
+                        } else {
+                            critical ("%s cannot be processed.", image_file.get_basename ());
+                        }
+                    }
+                    hidden_stack.visible_child_name = "images";
+                    dialog.hide ();
+                    break;
+                case Gtk.ResponseType.CANCEL:
+                    dialog.hide ();
+                    break;
+            }
+            dialog.destroy ();
+        });
     }
 }
