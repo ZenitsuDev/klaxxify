@@ -87,8 +87,8 @@ public class Klaxxify.SideBar : Gtk.Box {
 
         photo_return_point.on_drop.connect ((val, x, y) => {
             if (val.type () == typeof (Gtk.Image)) {
-                var image_file = ((Gtk.Image) val).file;
-                var returned_img = new Gtk.Image.from_file (image_file) {
+                var image_file = ((Gtk.Image) val).get_data<string> ("filename");
+                var returned_img = new Gtk.Image.from_paintable (((Gtk.Image) val).paintable) {
                     width_request = 100,
                     height_request = 100,
                     margin_start = 10,
@@ -98,6 +98,7 @@ public class Klaxxify.SideBar : Gtk.Box {
                     halign = Gtk.Align.CENTER,
                     valign = Gtk.Align.CENTER,
                 };
+                returned_img.set_data<string> ("filename", image_file);
                 returned_img.add_css_class (Granite.STYLE_CLASS_CARD);
 
                 var fbcontainer = new Gtk.FlowBoxChild () {
@@ -135,6 +136,7 @@ public class Klaxxify.SideBar : Gtk.Box {
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = (Gtk.Image) flowbox.get_child_at_pos ((int) x, (int) y).child;
+                print ("From Sidebar: %s\n", child.get_data<string> ("filename"));
                 flowbox.set_data<Gtk.Image> ("dragged", child);
                 return new Gdk.ContentProvider.for_value (child);
             }
@@ -153,12 +155,12 @@ public class Klaxxify.SideBar : Gtk.Box {
 
         drag_source.drag_end.connect ((drag, del) => {
             if (del) {
-                if (child.file in unused_files && drag.get_data<string> ("in_sidebar") == "false") {
+                if (child.get_data<string> ("filename") in unused_files && drag.get_data<string> ("in_sidebar") == "false") {
                     var arr = new GenericArray<string> ();
                     arr.data = unused_files;
 
                     uint source_index = 0;
-                    while (arr.get (source_index) != child.file) {
+                    while (arr.get (source_index) != child.get_data<string> ("filename")) {
                         source_index++;
                     }
 
@@ -184,7 +186,14 @@ public class Klaxxify.SideBar : Gtk.Box {
     }
 
     public void add_item (string filename) {
-        var image = new Gtk.Image.from_file (filename) {
+        Gdk.Texture? texture = null;
+        try {
+            texture = Gdk.Texture.from_filename (filename);
+        } catch (Error e) {
+            critical ("%s\n", e.message);
+        }
+
+        var image = new Gtk.Image.from_paintable (texture) {
             width_request = 100,
             height_request = 100,
             margin_start = 10,
@@ -194,6 +203,7 @@ public class Klaxxify.SideBar : Gtk.Box {
             halign = Gtk.Align.CENTER,
             valign = Gtk.Align.CENTER,
         };
+        image.set_data<string> ("filename", filename);
         image.add_css_class (Granite.STYLE_CLASS_CARD);
 
         var fbcontainer = new Gtk.FlowBoxChild () {

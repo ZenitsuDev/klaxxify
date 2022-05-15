@@ -44,10 +44,18 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         };
 
         for (var item_num = 0; item_num < klaxx_items.length - 1; item_num++) {
-            var image = new Gtk.Image.from_file (klaxx_items[item_num + 1]) {
+            Gdk.Texture? texture = null;
+            try {
+                texture = Gdk.Texture.from_filename (klaxx_items[item_num + 1]);
+            } catch (Error e) {
+                critical ("%s\n", e.message);
+            }
+
+            var image = new Gtk.Image.from_paintable (texture) {
                 width_request = 100,
                 height_request = 100
             };
+            image.set_data<string> ("filename", klaxx_items[item_num + 1]);
 
             flowbox.append (image);
         }
@@ -95,12 +103,14 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
         drop_target.on_drop.connect ((source, val, x, y) => {
             var fb = (Gtk.FlowBox) source.get_widget ();
-            var sidebarimage = (Gtk.Image) val;
-            var file = sidebarimage.file;
-            var image = new Gtk.Image.from_file (file) {
-                width_request = sidebarimage.width_request,
-                height_request = sidebarimage.height_request,
+            var source_image = (Gtk.Image) val;
+            var file = source_image.get_data<string> ("filename");
+            print ("%s\n", (file == null).to_string ());
+            var image = new Gtk.Image.from_paintable (source_image.paintable) {
+                width_request = source_image.width_request,
+                height_request = source_image.height_request,
             };
+            image.set_data<string> ("filename", file);
 
             if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
                 flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").remove_css_class ("highlight_child");
@@ -128,6 +138,7 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = flowbox.get_child_at_pos ((int) x, (int) y);
+                print ("From Tier: %s\n", ((Gtk.Image) child.child).get_data<string> ("filename"));
                 flowbox.set_data<Gtk.Image> ("dragged", (Gtk.Image) child.child);
                 return new Gdk.ContentProvider.for_value ((Gtk.Image) child.child);
             }
@@ -146,12 +157,12 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
         drag_source.drag_end.connect ((source, drag, del) => {
             if (del) {
-                if (((Gtk.Image) child.child).file in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
+                if (((Gtk.Image) child.child).get_data<string> ("filename") in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
                     var arr = new GenericArray<string> ();
                     arr.data = klaxx_items;
 
                     uint source_index = 0;
-                    while (arr.get (source_index) != ((Gtk.Image) child.child).file) {
+                    while (arr.get (source_index) != ((Gtk.Image) child.child).get_data<string> ("filename")) {
                         source_index++;
                     }
 
