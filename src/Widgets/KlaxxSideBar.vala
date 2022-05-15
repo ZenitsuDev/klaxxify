@@ -136,7 +136,6 @@ public class Klaxxify.SideBar : Gtk.Box {
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = (Gtk.Image) flowbox.get_child_at_pos ((int) x, (int) y).child;
-                print ("From Sidebar: %s\n", child.get_data<string> ("filename"));
                 flowbox.set_data<Gtk.Image> ("dragged", child);
                 return new Gdk.ContentProvider.for_value (child);
             }

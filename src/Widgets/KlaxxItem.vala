@@ -105,7 +105,6 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
             var fb = (Gtk.FlowBox) source.get_widget ();
             var source_image = (Gtk.Image) val;
             var file = source_image.get_data<string> ("filename");
-            print ("%s\n", (file == null).to_string ());
             var image = new Gtk.Image.from_paintable (source_image.paintable) {
                 width_request = source_image.width_request,
                 height_request = source_image.height_request,
@@ -138,7 +137,6 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = flowbox.get_child_at_pos ((int) x, (int) y);
-                print ("From Tier: %s\n", ((Gtk.Image) child.child).get_data<string> ("filename"));
                 flowbox.set_data<Gtk.Image> ("dragged", (Gtk.Image) child.child);
                 return new Gdk.ContentProvider.for_value ((Gtk.Image) child.child);
             }
