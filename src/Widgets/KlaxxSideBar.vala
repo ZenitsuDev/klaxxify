@@ -122,7 +122,7 @@ public class Klaxxify.SideBar : Gtk.Box {
 
             var drag = photo_return_point.get_current_drop ().get_drag ();
             if (drag.get_data<string> ("class") == "sidebar") {
-                drag.set_data<string> ("in_sidebar", "true");
+                drag.set_data<bool> ("in_sidebar", true);
             }
 
             return true;
@@ -147,12 +147,12 @@ public class Klaxxify.SideBar : Gtk.Box {
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
             drag.set_data<string> ("class", "sidebar");
-            drag.set_data<string> ("in_sidebar", "false");
+            drag.set_data<bool> ("in_sidebar", false);
         });
 
         drag_source.drag_end.connect ((drag, del) => {
             if (del) {
-                if (child.filename in unused_files && drag.get_data<string> ("in_sidebar") == "false") {
+                if (child.filename in unused_files && !(drag.get_data<bool> ("in_sidebar"))) {
                     var arr = new GenericArray<string> ();
                     arr.data = unused_files;
 

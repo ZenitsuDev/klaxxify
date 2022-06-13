@@ -118,7 +118,7 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
             var drag = drop_target.get_current_drop ().get_drag ();
             if (drag.get_data<string> ("class") == klaxx_items[0]) {
-                drag.set_data<string> ("drop_same", "true");
+                drag.set_data<bool> ("drop_same", true);
             }
 
             page.save_to_file (klaxx_items, index);
@@ -140,12 +140,12 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
             drag.set_data<string> ("class", klaxx_items[0]);
-            drag.set_data<string> ("drop_same", "false");
+            drag.set_data<bool> ("drop_same", false);
         });
 
         drag_source.drag_end.connect ((source, drag, del) => {
             if (del) {
-                if (((Klaxxify.Image) child.child).filename in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
+                if (((Klaxxify.Image) child.child).filename in klaxx_items && !(drag.get_data<bool> ("drop_same"))) {
                     var arr = new GenericArray<string> ();
                     arr.data = klaxx_items;
 
