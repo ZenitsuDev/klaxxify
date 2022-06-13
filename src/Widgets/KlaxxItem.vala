@@ -5,6 +5,7 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
     public int index { get; construct; }
     private Gtk.FlowBoxChild child;
     public Klaxxify.KlaxxPage page { get; construct; }
+    private Gtk.FlowBoxChild highlighted_child;
 
     public KlaxxItem (Klaxxify.KlaxxPage page, string klaxx, int index) {
         Object (
@@ -70,19 +71,19 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
         drop_target.motion.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
-                if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
-                    flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").remove_css_class ("highlight_child");
-                    flowbox.set_data<Gtk.FlowBoxChild> ("highlighted", null);
+                if (highlighted_child != null) {
+                    highlighted_child.remove_css_class ("highlight_child");
+                    highlighted_child = null;
                 }
             } else {
                 var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
-                if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") == null) {
-                    flowbox.set_data<Gtk.FlowBoxChild> ("highlighted", fbchild);
+                if (highlighted_child == null) {
+                    highlighted_child = fbchild;
                     fbchild.add_css_class ("highlight_child");
-                } else if (fbchild != flowbox.get_data<Gtk.FlowBoxChild> ("highlighted")) {
-                    flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").remove_css_class ("highlight_child");
+                } else if (fbchild != highlighted_child) {
+                    highlighted_child.remove_css_class ("highlight_child");
                     fbchild.add_css_class ("highlight_child");
-                    flowbox.set_data<Gtk.FlowBoxChild> ("highlighted", fbchild);
+                    highlighted_child = fbchild;
                 }
             }
 
@@ -90,14 +91,14 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         });
 
         drop_target.enter.connect (() => {
-            if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
-                flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").add_css_class ("highlight_child");
+            if (highlighted_child != null) {
+                highlighted_child.add_css_class ("highlight_child");
             }
         });
 
         drop_target.leave.connect (() => {
-            if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
-                flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").remove_css_class ("highlight_child");
+            if (highlighted_child != null) {
+                highlighted_child.remove_css_class ("highlight_child");
             }
         });
 
@@ -111,8 +112,8 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
             };
             image.set_data<string> ("filename", file);
 
-            if (flowbox.get_data<Gtk.FlowBoxChild> ("highlighted") != null) {
-                flowbox.get_data<Gtk.FlowBoxChild> ("highlighted").remove_css_class ("highlight_child");
+            if (highlighted_child != null) {
+                highlighted_child.remove_css_class ("highlight_child");
             }
 
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
