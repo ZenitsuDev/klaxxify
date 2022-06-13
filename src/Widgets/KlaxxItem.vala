@@ -181,7 +181,6 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
             margin_end = 20,
             margin_top = 20
         };
-
         main_child.append (klaxx_title);
         main_child.append (flowbox);
         main_child.add_css_class (Granite.STYLE_CLASS_CARD);
@@ -205,7 +204,12 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         } else {
             klaxx_array.length = klaxx_array.length + 1;
             klaxx_array.insert (index, filename);
-            klaxx_array.remove (null);
+
+            for (var iter = 0; iter < klaxx_array.length; iter++) {
+                if (klaxx_array.get (iter) == null) {
+                    klaxx_array.remove_index (iter);
+                }
+            }
         }
 
         return klaxx_array.data;
