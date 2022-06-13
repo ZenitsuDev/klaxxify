@@ -18,6 +18,7 @@ executable(
     'src/Widgets/KlaxxPage.vala',
     'src/Widgets/KlaxxItem.vala',
     'src/Widgets/KlaxxSideBar.vala',
+    'src/Widgets/KlaxxImage.vala',
 
     dependencies : [
         dependency('gtk4'),

@@ -52,16 +52,12 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
                 critical ("%s\n", e.message);
             }
 
-            var image = new Gtk.Image.from_paintable (texture) {
-                width_request = 100,
-                height_request = 100
-            };
-            image.set_data<string> ("filename", klaxx_items[item_num + 1]);
+            var image = new Klaxxify.Image (texture, klaxx_items[item_num + 1]);
 
             flowbox.append (image);
         }
 
-        var drop_target = new Gtk.DropTarget (typeof (Gtk.Image), Gdk.DragAction.MOVE);
+        var drop_target = new Gtk.DropTarget (typeof (Klaxxify.Image), Gdk.DragAction.MOVE);
         flowbox.add_controller (drop_target);
 
         var drag_source = new Gtk.DragSource () {
@@ -104,13 +100,8 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
         drop_target.on_drop.connect ((source, val, x, y) => {
             var fb = (Gtk.FlowBox) source.get_widget ();
-            var source_image = (Gtk.Image) val;
-            var file = source_image.get_data<string> ("filename");
-            var image = new Gtk.Image.from_paintable (source_image.paintable) {
-                width_request = source_image.width_request,
-                height_request = source_image.height_request,
-            };
-            image.set_data<string> ("filename", file);
+            var source_image = (Klaxxify.Image) val;
+            var image = new Klaxxify.Image (source_image.texture, source_image.filename);
 
             if (highlighted_child != null) {
                 highlighted_child.remove_css_class ("highlight_child");
@@ -118,11 +109,11 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
             if (flowbox.get_child_at_pos ((int) x, (int) y) == null) {
                 fb.append (image);
-                klaxx_items = insert_item (klaxx_items, file, klaxx_items.length);
+                klaxx_items = insert_item (klaxx_items, source_image.filename, klaxx_items.length);
             } else {
                 var fbchild = flowbox.get_child_at_pos ((int) x, (int) y);
                 fb.insert (image, fbchild.get_index ());
-                klaxx_items = insert_item (klaxx_items, file, fbchild.get_index ());
+                klaxx_items = insert_item (klaxx_items, source_image.filename, fbchild.get_index ());
             }
 
             var drag = drop_target.get_current_drop ().get_drag ();
@@ -138,16 +129,14 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
         drag_source.prepare.connect ((x, y) => {
             if (flowbox.get_child_at_pos ((int) x, (int) y) != null) {
                 child = flowbox.get_child_at_pos ((int) x, (int) y);
-                flowbox.set_data<Gtk.Image> ("dragged", (Gtk.Image) child.child);
-                return new Gdk.ContentProvider.for_value ((Gtk.Image) child.child);
+                flowbox.set_data<Klaxxify.Image> ("dragged", (Klaxxify.Image) child.child);
+                return new Gdk.ContentProvider.for_value ((Klaxxify.Image) child.child);
             }
         });
 
         drag_source.drag_begin.connect ((source, drag) => {
             var fb = (Gtk.FlowBox) source.get_widget ();
-            var dragged = fb.get_data<Gtk.Image> ("dragged");
-            dragged.width_request = 100;
-            dragged.height_request = 100;
+            var dragged = fb.get_data<Klaxxify.Image> ("dragged");
             var child = new Gtk.WidgetPaintable (dragged);
             source.set_icon (child, 20, 20);
             drag.set_data<string> ("class", klaxx_items[0]);
@@ -156,12 +145,12 @@ public class Klaxxify.KlaxxItem : Gtk.Widget {
 
         drag_source.drag_end.connect ((source, drag, del) => {
             if (del) {
-                if (((Gtk.Image) child.child).get_data<string> ("filename") in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
+                if (((Klaxxify.Image) child.child).filename in klaxx_items && drag.get_data<string> ("drop_same") == "false") {
                     var arr = new GenericArray<string> ();
                     arr.data = klaxx_items;
 
                     uint source_index = 0;
-                    while (arr.get (source_index) != ((Gtk.Image) child.child).get_data<string> ("filename")) {
+                    while (arr.get (source_index) != ((Klaxxify.Image) child.child).filename) {
                         source_index++;
                     }
 
